@@ -1,82 +1,92 @@
 import json
 import numpy as np
 import cv2
+from tqdm import tqdm
+from scipy.spatial.transform import Rotation as R
 
+# Load json file
 def load_transforms_json(json_path):
     with open(json_path, 'r') as f:
         data = json.load(f)
     return data
 
+# Write json file
 def write_camera_path_json(camera_path_data, json_path):
     with open(json_path, 'w') as f:
         json.dump(camera_path_data, f, indent=2)
 
-def normalize_translaitons(frames):
+# 'transforms.json' format to ngp format
+def normalize_transforms(transform):
+    mat = np.copy(transform)
+    mat = mat[:-1,:]
+    mat[:,1] *= -1 # flip axis
+    mat[:,2] *= -1
+    mat[:,3] *= 0.33 #scale
+    mat[:,3] += [0.5, 0.5, 0.5] #offset
+    
+    mat = mat[[1,2,0], :] # swap axis
+    
+    rm = R.from_matrix(mat[:,:3]) 
+    
+    # quaternion (x, y, z, w) and translation
+    return rm.as_quat(), mat[:,3] + 0.025
 
-    transform_matrices = [np.array(frame["transform_matrix"]) for frame in frames]
+# Find frames that cross in the camera path
+def find_cross_frames(data, threshold=0.2):
+    hashmap = {}
+    potential_pairs = []
+    potential_pairs_idx = []
 
-    # Find the minimum and maximum values for x, y, and z coordinates
-    min_x = min(matrix[0, 3] for matrix in transform_matrices)
-    max_x = max(matrix[0, 3] for matrix in transform_matrices)
-    min_y = min(matrix[1, 3] for matrix in transform_matrices)
-    max_y = max(matrix[1, 3] for matrix in transform_matrices)
-    min_z = min(matrix[2, 3] for matrix in transform_matrices)
-    max_z = max(matrix[2, 3] for matrix in transform_matrices)
+    # Populate the hashmap
+    for idx, entry in enumerate(data):
+        x, y = entry['transform_matrix'][0][3], entry['transform_matrix'][1][3]
+        if (x, y) not in hashmap:
+            hashmap[(x, y)] = [idx]
+        else:
+            hashmap[(x, y)].append(idx)
 
-    # Calculate the scaling factors for x, y, and z coordinates
-    scale_x = 2.0 / (max_x - min_x)
-    scale_y = 2.0 / (max_y - min_y)
-    scale_z = 2.0 / (max_z - min_z)
+    # Check for close pairs
+    for idx_i, entry_i in enumerate(data):
+        x_i, y_i = entry_i['transform_matrix'][0][3], entry_i['transform_matrix'][1][3]
 
-    # Normalize the positions of the translation matrices to [-1, 1]^3 bounding box
-    for matrix in transform_matrices:
-        matrix[0, 3] = scale_x * (matrix[0, 3] - min_x) - 1.0
-        matrix[1, 3] = scale_y * (matrix[1, 3] - min_y) - 1.0
-        matrix[2, 3] = scale_z * (matrix[2, 3] - min_z) - 1.0
+        for (x_j, y_j), indices in hashmap.items():
+            if abs(x_i - x_j) <= threshold and abs(y_i - y_j) <= threshold:
+                for idx_j in indices:
+                    if idx_i != idx_j:
+                        closeness = abs(x_i - x_j) + abs(y_i - y_j)
+                        potential_pairs.append(((data[idx_i]['file_path'], data[idx_j]['file_path']), closeness))
+                        potential_pairs_idx.append((idx_i+1, idx_j+1))  # Store indices as well
 
-    return transform_matrices
+    # Sort the pairs and indices by closeness
+    sorted_pairs_and_indices = sorted(zip(potential_pairs, potential_pairs_idx), key=lambda x: x[0][1])
+    sorted_pairs, sorted_indices = zip(*sorted_pairs_and_indices)
 
+    return sorted_pairs, sorted_indices
 
-def check_crossing(frame1, frame2):
-    translation1 = frame1[:2, 3]
-    translation2 = frame2[:2, 3]
+# Find most similar pair of images
+def find_most_similar(images, fps):
+    orb = cv2.ORB_create()
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 
-    return np.array_equal(translation1, translation2)
+    best_match_pair = (None, None)
+    best_match_idx = (None, None)
+    max_matches = -float('inf')
 
-def find_cross_frames(frames):
+    # Iterate through the first fps images
+    for i in tqdm(range(fps), desc="Comparing images", ncols=100):
+        reference_img = images[i]
+        kp1, des1 = orb.detectAndCompute(reference_img, None)
 
-    transform_matrices = [np.array(frame["transform_matrix"]) for frame in frames]
+        for j in range(fps + 1, len(images)):
+            test_img = images[j]
+            kp2, des2 = orb.detectAndCompute(test_img, None)
 
-    # Calculate all possible pairs of frames
-    num_frames = transform_matrices.shape[0]
-    indices = np.triu_indices(num_frames, k=1)
+            matches = bf.match(des1, des2)
+            matches = sorted(matches, key = lambda x:x.distance)
 
-    # Find pairs of frames that cross each other in x and y axis
-    crossing_pairs = [(i, j) for i, j in zip(*indices) if check_crossing(transform_matrices[i], transform_matrices[j])]
+            if len(matches) > max_matches and j - i > fps:
+                max_matches = len(matches)
+                best_match_pair = (reference_img, test_img)
+                best_match_idx = (i+1, j + 1)
 
-    return crossing_pairs
-
-def find_most_similar(images):
-
-    most_similar = (None, None)
-
-    min_similarity = float('inf')
-
-    for i in range(len(images)):
-        image1 = images[i]
-
-        for j in range(i+1, len(images)):
-            image2 = images[j]
-
-            # Calculate Structural Similarity Index
-            similarity, _ = cv2.compareSSIM(image1, image2, full=True)
-
-            # Calculate Mean Squared Error:
-            # mse = np.mean((image1 - image2) ** 2)
-            # similarity_score = -mse  # Invert the sign to get lowest MSE
-
-            if similarity < min_similarity:
-                min_similarity = similarity
-                most_similar = (image1, image2)
-
-    return most_similar
+    return best_match_pair, best_match_idx
