@@ -78,29 +78,32 @@ def generate_path(data, images, fps, smoothness, duration):
     else:
         pair_images, pair_images_indices = find_most_similar(images, fps)
 
-        print(pair_images_indices)
-
-        # Get the transformations
-        q1, t1 = normalize_transforms(np.array(frames_dict[pair_images_indices[0]]))
-        q2, t2 = normalize_transforms(np.array(frames_dict[pair_images_indices[1]]))
-
-        average_quaterions = (q1 + q2) / 2
-        average_translations = (t1 + t2) / 2
-
-        camera_path_data['path'].append({
-            "R": list(average_quaterions),
-            "T": list(average_translations),
-            "aperture_size": 0.0,
-            "fov": 50.625,
-            "glow_mode": 0,
-            "glow_y_cutoff": 0.0,
-            "scale": 1.6500000953674316,
-            "slice": 0.0
-        })
-
         start_idx = pair_images_indices[0] + 5
         end_idx = pair_images_indices[1] - 5
-    
+
+        # Get the transformations for the start and end indices
+        q_start, t_start = normalize_transforms(np.array(frames_dict[start_idx]))
+        q_end, t_end = normalize_transforms(np.array(frames_dict[end_idx]))
+
+        for i in range(10):
+            t = i / 9.0  # Choose points linearly
+
+            interpolated_quaternions = interpolate(q_start, q_end, t)
+            interpolated_translations = interpolate(t_start, t_end, t)
+
+            camera_path_data['path'].append({
+                "R": list(interpolated_quaternions),
+                "T": list(interpolated_translations),
+                "aperture_size": 0.0,
+                "fov": 50.625,
+                "glow_mode": 0,
+                "glow_y_cutoff": 0.0,
+                "scale": 1.6500000953674316,
+                "slice": 0.0
+            })
+        
+        start_idx += 1
+        end_idx -= 1
     
     n_frames = end_idx - start_idx + 1
 
@@ -122,7 +125,7 @@ def generate_path(data, images, fps, smoothness, duration):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--duration', type=int, default=2)
+    parser.add_argument('--duration', type=int, default=10)
     parser.add_argument('--smoothness', type=int, default=0)
     parser.add_argument('--fps', type=int, default=24)
     parser.add_argument('--data', type=str, required=True)

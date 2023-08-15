@@ -15,6 +15,10 @@ def write_camera_path_json(camera_path_data, json_path):
     with open(json_path, 'w') as f:
         json.dump(camera_path_data, f, indent=2)
 
+# Linear Interpolation
+def interpolate(value1, value2, factor):
+    return factor * value1 + (1 - factor) * value2
+
 # 'transforms.json' format to ngp format
 def normalize_transforms(transform):
     mat = np.copy(transform)
@@ -59,6 +63,11 @@ def find_cross_frames(data, threshold=0.2):
 
     # Sort the pairs and indices by closeness
     sorted_pairs_and_indices = sorted(zip(potential_pairs, potential_pairs_idx), key=lambda x: x[0][1])
+    
+    # Check if the list is empty
+    if not sorted_pairs_and_indices:
+        return [], []  # Return empty lists as the function result
+
     sorted_pairs, sorted_indices = zip(*sorted_pairs_and_indices)
 
     return sorted_pairs, sorted_indices
