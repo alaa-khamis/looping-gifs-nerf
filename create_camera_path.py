@@ -2,7 +2,9 @@ import argparse
 import os
 import numpy as np
 import cv2
+import torch
 from utils import *
+from model import *
 
 def generate_full_path(data, duration):
     camera_path_data = {
@@ -76,24 +78,40 @@ def generate_path(data, images, fps, smoothness, duration):
         end_idx = cross_frames_indices[1][0]
     
     else:
-        pair_images, pair_images_indices = find_most_similar(images, fps)
+        # pair_images, pair_images_indices = find_most_similar(images, fps)
 
-        start_idx = pair_images_indices[0] + 5
-        end_idx = pair_images_indices[1] - 5
+        pair_images_indices = (2, 120)
 
-        # Get the transformations for the start and end indices
-        q_start, t_start = normalize_transforms(np.array(frames_dict[start_idx]))
-        q_end, t_end = normalize_transforms(np.array(frames_dict[end_idx]))
+        samples = 15
 
-        for i in range(10):
-            t = i / 9.0  # Choose points linearly
+        start_idx = pair_images_indices[0] + samples
+        end_idx = pair_images_indices[1] - samples
 
-            interpolated_quaternions = interpolate(q_start, q_end, t)
-            interpolated_translations = interpolate(t_start, t_end, t)
+        frames = [torch.tensor(frames_dict[frame]).view(-1).cuda() for frame in frames_dict.keys()]
+
+        frames = frames[start_idx : end_idx + 1]
+
+        sequence_length = 8
+
+        data = []
+        for i in range(len(frames) - sequence_length):
+            sequence = torch.stack()
+            data.append(sequence)
+
+        model = LSTMModel().cuda()
+
+        model = train_model(data, model)
+
+        model.eval()
+
+        path = predict_path(model, data[-1], data[0])
+        
+        for matrix in path:
+            q, t = normalize_transforms(np.array(matrix))
 
             camera_path_data['path'].append({
-                "R": list(interpolated_quaternions),
-                "T": list(interpolated_translations),
+                "R": list(q),
+                "T": list(t),
                 "aperture_size": 0.0,
                 "fov": 50.625,
                 "glow_mode": 0,
@@ -151,11 +169,11 @@ def main():
     camera_path_data = generate_path(transforms_data, images, args.fps, args.smoothness, args.duration)
 
     # Create JSON file
-    write_camera_path_json(camera_path_data, str(args.output_dir + '/camera_path.json'))
+    write_camera_path_json(camera_path_data, str(args.output_dir + '/camera_path2.json'))
 
     # Full camera path
     full_camera_path = generate_full_path(transforms_data, args.duration)
-    write_camera_path_json(full_camera_path, str(args.output_dir + '/full_camera_path.json'))
+    write_camera_path_json(full_camera_path, str(args.output_dir + '/full_camera_path2.json'))
 
 if __name__ == '__main__':
     main()

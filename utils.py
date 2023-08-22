@@ -15,8 +15,13 @@ def write_camera_path_json(camera_path_data, json_path):
     with open(json_path, 'w') as f:
         json.dump(camera_path_data, f, indent=2)
 
+# Create indices pattern
+def get_frame_indices_pattern(num):
+    
+    return list(range(1, num + 1))
+
 # Linear Interpolation
-def interpolate(value1, value2, factor):
+def linear_interpolate(value1, value2, factor):
     return factor * value1 + (1 - factor) * value2
 
 # 'transforms.json' format to ngp format
@@ -72,7 +77,7 @@ def find_cross_frames(data, threshold=0.2):
 
     return sorted_pairs, sorted_indices
 
-# Find most similar pair of images
+# Find most similar pair of images - ORB matching
 def find_most_similar(images, fps):
     orb = cv2.ORB_create()
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
@@ -86,13 +91,15 @@ def find_most_similar(images, fps):
         reference_img = images[i]
         kp1, des1 = orb.detectAndCompute(reference_img, None)
 
-        for j in range(fps + 1, len(images)):
+        # Match with the last 2 * fps images
+        for j in range(len(images) - 2*fps, len(images)):
             test_img = images[j]
             kp2, des2 = orb.detectAndCompute(test_img, None)
 
             matches = bf.match(des1, des2)
             matches = sorted(matches, key = lambda x:x.distance)
 
+            # Choose best matched pair
             if len(matches) > max_matches and j - i > fps:
                 max_matches = len(matches)
                 best_match_pair = (reference_img, test_img)
