@@ -24,6 +24,9 @@ def get_frame_indices_pattern(num):
 def linear_interpolate(value1, value2, factor):
     return factor * value1 + (1 - factor) * value2
 
+def get_translation(frame):
+    return frame[:,3] + 0.025
+
 # 'transforms.json' format to ngp format
 def normalize_transforms(transform):
     mat = np.copy(transform)
@@ -40,42 +43,29 @@ def normalize_transforms(transform):
     # quaternion (x, y, z, w) and translation
     return rm.as_quat(), mat[:,3] + 0.025
 
-# Find frames that cross in the camera path
-def find_cross_frames(data, threshold=0.2):
-    hashmap = {}
-    potential_pairs = []
-    potential_pairs_idx = []
-
-    # Populate the hashmap
-    for idx, entry in enumerate(data):
-        x, y = entry['transform_matrix'][0][3], entry['transform_matrix'][1][3]
-        if (x, y) not in hashmap:
-            hashmap[(x, y)] = [idx]
-        else:
-            hashmap[(x, y)].append(idx)
-
-    # Check for close pairs
-    for idx_i, entry_i in enumerate(data):
-        x_i, y_i = entry_i['transform_matrix'][0][3], entry_i['transform_matrix'][1][3]
-
-        for (x_j, y_j), indices in hashmap.items():
-            if abs(x_i - x_j) <= threshold and abs(y_i - y_j) <= threshold:
-                for idx_j in indices:
-                    if idx_i != idx_j:
-                        closeness = abs(x_i - x_j) + abs(y_i - y_j)
-                        potential_pairs.append(((data[idx_i]['file_path'], data[idx_j]['file_path']), closeness))
-                        potential_pairs_idx.append((idx_i+1, idx_j+1))  # Store indices as well
-
-    # Sort the pairs and indices by closeness
-    sorted_pairs_and_indices = sorted(zip(potential_pairs, potential_pairs_idx), key=lambda x: x[0][1])
+def find_cross_frames(data, fps, threshold=0.5):
+    # Extract points for comparison
+    start_points = data[:fps]
+    end_points = data[-3*fps:]
     
-    # Check if the list is empty
-    if not sorted_pairs_and_indices:
-        return [], []  # Return empty lists as the function result
+    min_distance = float('inf')
+    closest_pair = None
+    closest_indices = None
 
-    sorted_pairs, sorted_indices = zip(*sorted_pairs_and_indices)
+    for i, start_point in enumerate(start_points):
+        for j, end_point in enumerate(end_points):
+            distance = np.linalg.norm(start_point - end_point)
 
-    return sorted_pairs, sorted_indices
+            if distance < min_distance:
+                min_distance = distance
+                closest_pair = (start_point, end_point)
+                closest_indices = (i+1, len(data) - 3*fps + j + 1)
+
+    if min_distance > threshold:
+        return [], []
+
+    return closest_pair, closest_indices
+
 
 # Find most similar pair of images - ORB matching
 def find_most_similar(images, fps):

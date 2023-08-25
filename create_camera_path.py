@@ -56,10 +56,16 @@ def generate_path(data, images, fps, smoothness, duration):
         
     frames_dict = dict(sorted(frames_dict.items()))
 
-    cross_frames, cross_frames_indices = find_cross_frames(data['frames'], 0.2)
-    
-    if cross_frames_indices and (cross_frames_indices[0][1] - cross_frames_indices[0][0] > fps):
-        start_idx = cross_frames_indices[0][0]
+    translations = [get_translation(np.array(frames_dict[frame])) for frame in frames_dict.keys()]
+
+    cross_frames, cross_frames_indices = find_cross_frames(translations, fps)
+
+    if cross_frames_indices and abs(cross_frames_indices[0] - cross_frames_indices[1]) > fps:
+
+        print("Corssing Frames = ", cross_frames_indices)
+
+        start_idx = cross_frames_indices[0]
+        end_idx = cross_frames_indices[1]
 
         q, t = normalize_transforms(np.array(frames_dict[start_idx]))
 
@@ -75,36 +81,28 @@ def generate_path(data, images, fps, smoothness, duration):
         })
 
         start_idx += 1
-        end_idx = cross_frames_indices[1][0]
     
     else:
-        # pair_images, pair_images_indices = find_most_similar(images, fps)
+        pair_images, pair_images_indices = find_most_similar(images, fps)
 
-        pair_images_indices = (2, 120)
-
-        samples = 15
+        samples = 10
 
         start_idx = pair_images_indices[0] + samples
         end_idx = pair_images_indices[1] - samples
 
-        frames = [torch.tensor(frames_dict[frame]).view(-1).cuda() for frame in frames_dict.keys()]
+        data = [torch.tensor(frames_dict[frame]).view(-1).cuda() for frame in frames_dict.keys()]
 
-        frames = frames[start_idx : end_idx + 1]
+        # Define the model
+        model = LSTMModel(16, 150, 2).cuda()
 
-        sequence_length = 8
+        data = data[start_idx : end_idx + 1]
 
-        data = []
-        for i in range(len(frames) - sequence_length):
-            sequence = torch.stack()
-            data.append(sequence)
+        # Train the model
+        model = train_model(data, model, epochs=150)
 
-        model = LSTMModel().cuda()
+        # path = predict_path(model, data[-1], data[0], 2 * samples + 1)
 
-        model = train_model(data, model)
-
-        model.eval()
-
-        path = predict_path(model, data[-1], data[0])
+        path = refine_path(model, data[-1], data[0], 2 * samples + 1)
         
         for matrix in path:
             q, t = normalize_transforms(np.array(matrix))
@@ -169,11 +167,11 @@ def main():
     camera_path_data = generate_path(transforms_data, images, args.fps, args.smoothness, args.duration)
 
     # Create JSON file
-    write_camera_path_json(camera_path_data, str(args.output_dir + '/camera_path2.json'))
+    write_camera_path_json(camera_path_data, str(args.output_dir + '/camera_path.json'))
 
     # Full camera path
     full_camera_path = generate_full_path(transforms_data, args.duration)
-    write_camera_path_json(full_camera_path, str(args.output_dir + '/full_camera_path2.json'))
+    write_camera_path_json(full_camera_path, str(args.output_dir + '/full_camera_path.json'))
 
 if __name__ == '__main__':
     main()
