@@ -1,6 +1,7 @@
 import json
 import numpy as np
 import cv2
+import math
 from tqdm import tqdm
 from scipy.spatial.transform import Rotation as R
 
@@ -15,10 +16,10 @@ def write_camera_path_json(camera_path_data, json_path):
     with open(json_path, 'w') as f:
         json.dump(camera_path_data, f, indent=2)
 
-# Create indices pattern
-def get_frame_indices_pattern(num):
-    
-    return list(range(1, num + 1))
+# Calculate FOV (horizontal)
+def calculate_fov(fl_x, w):
+    fov_x = 2 * math.degrees(math.atan(w / (2 * fl_x)))
+    return fov_x
 
 # Linear Interpolation
 def linear_interpolate(value1, value2, factor):
@@ -43,8 +44,8 @@ def normalize_transforms(transform):
     # quaternion (x, y, z, w) and translation
     return rm.as_quat(), mat[:,3] + 0.025
 
+# Find Crossing Frames
 def find_cross_frames(data, fps, threshold=0.5):
-    # Extract points for comparison
     start_points = data[:fps]
     end_points = data[-3*fps:]
     

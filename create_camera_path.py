@@ -6,7 +6,7 @@ import torch
 from utils import *
 from model import *
 
-def generate_full_path(data, duration):
+def generate_full_path(data, duration, fov):
     camera_path_data = {
         "loop":False,
         "path":[], 
@@ -30,7 +30,7 @@ def generate_full_path(data, duration):
             "R": list(q),
             "T": list(t),
             "aperture_size": 0.0,
-            "fov": 50.625,
+            "fov": fov,
             "glow_mode": 0,
             "glow_y_cutoff": 0.0,
             "scale": 1.6500000953674316,
@@ -39,7 +39,7 @@ def generate_full_path(data, duration):
 
     return camera_path_data
 
-def generate_path(data, images, fps, smoothness, duration):
+def generate_path(data, images, fps, smoothness, duration, fov):
     camera_path_data = {
         "loop":True,
         "path":[], 
@@ -73,7 +73,7 @@ def generate_path(data, images, fps, smoothness, duration):
             "R": list(q),
             "T": list(t),
             "aperture_size": 0.0,
-            "fov": 50.625,
+            "fov": fov,
             "glow_mode": 0,
             "glow_y_cutoff": 0.0,
             "scale": 1.6500000953674316,
@@ -100,8 +100,6 @@ def generate_path(data, images, fps, smoothness, duration):
         # Train the model
         model = train_model(data, model, epochs=150)
 
-        # path = predict_path(model, data[-1], data[0], 2 * samples + 1)
-
         path = refine_path(model, data[-1], data[0], 2 * samples + 1)
         
         for matrix in path:
@@ -111,7 +109,7 @@ def generate_path(data, images, fps, smoothness, duration):
                 "R": list(q),
                 "T": list(t),
                 "aperture_size": 0.0,
-                "fov": 50.625,
+                "fov": fov,
                 "glow_mode": 0,
                 "glow_y_cutoff": 0.0,
                 "scale": 1.6500000953674316,
@@ -130,7 +128,7 @@ def generate_path(data, images, fps, smoothness, duration):
             "R": list(q),
             "T": list(t),
             "aperture_size": 0.0,
-            "fov": 50.625,
+            "fov": fov,
             "glow_mode": 0,
             "glow_y_cutoff": 0.0,
             "scale": 1.6500000953674316,
@@ -163,14 +161,16 @@ def main():
     # Get data from 'trasnforms.json'
     transforms_data = load_transforms_json(str(args.data + '/transforms.json'))
 
+    fov = calculate_fov(transforms_data["fl_x"], transforms_data["w"])
+
     # Generate camera path
-    camera_path_data = generate_path(transforms_data, images, args.fps, args.smoothness, args.duration)
+    camera_path_data = generate_path(transforms_data, images, args.fps, args.smoothness, args.duration,fov)
 
     # Create JSON file
     write_camera_path_json(camera_path_data, str(args.output_dir + '/camera_path.json'))
 
     # Full camera path
-    full_camera_path = generate_full_path(transforms_data, args.duration)
+    full_camera_path = generate_full_path(transforms_data, args.duration, fov)
     write_camera_path_json(full_camera_path, str(args.output_dir + '/full_camera_path.json'))
 
 if __name__ == '__main__':

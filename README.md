@@ -31,6 +31,82 @@ My approach uses Nvidia's Instant-NGP and Neural Networks to produce perfect-loo
 Using this approach can also serve as a good shaking stabilization for videos. The interpolation between camera frames in the path results in a smooth video render of the scene using the original camera frames.
 
 
+<h2>Examples:</h2>
+
+<h2> Synthetics Data:</h2>
+<h3> Skull Disconnected:</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>Original</th>
+      <th>Generated</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Path</td>
+      <td><img src="results/skull_linear/disconnected/camera_visualization.png" alt="Original Path" width="350"></td>
+      <td><img src="results/skull_lstm/skull_generated_path.png" alt="Generated Path" width="350"></td>
+    </tr>
+    <tr>
+      <td>GIF</td>
+      <td><img src="results/skull_linear/disconnected/skull_disconnected_original.gif" alt="Original" width="350"></td>
+      <td><img src="results/skull_lstm/skull_generated.gif" alt="Generated" width="350"></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3> Skull Tie:</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>Original</th>
+      <th>Generated</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Path</td>
+      <td><img src="results/skull_linear/tie/camera_visualization.png" alt="Original Path" width="350"></td>
+      <td><img src="results/skull_linear/tie/path_visualization.png" alt="Generated Path" width="350"></td>
+    </tr>
+    <tr>
+      <td>GIF</td>
+      <td><img src="results/skull_linear/tie/skull_tie_original.gif" alt="Original" width="350"></td>
+      <td><img src="results/skull_linear/tie/skull_tie_render.gif" alt="Generated" width="350"></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Real Data </h2>
+<h3> Books:</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>Original</th>
+      <th>Generated</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Path</td>
+      <td><img src="results/books/books_original_path.png" alt="Original Path" width="350"></td>
+      <td><img src="results/books/books_generated_path.png" alt="Generated Path" width="350"></td>
+    </tr>
+    <tr>
+      <td>GIF</td>
+      <td><img src="results/books/books_original.gif" alt="Original" width="350"></td>
+      <td><img src="results/books/books_generated.gif" alt="Generated" width="350"></td>
+    </tr>
+  </tbody>
+</table>
+
 <h2> Limitations </h2>
 
 - <b>Original Data Prerequisites:</b> 
