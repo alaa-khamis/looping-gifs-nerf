@@ -13,8 +13,6 @@ Dynamic scenes or camera pans can lead to inconsistencies in motion and perspect
 - <b>Temporal Misalignment:</b> 
 Even slight timing differences between the end and start frames can result in disruptive visual transitions.
 
-In this project, I will address those problems and provide a practical and effective solution.
-
 <h2> Solution </h2>
 
 My approach uses Nvidia's Instant-NGP and Neural Networks to produce perfect-looping renderes.
@@ -23,7 +21,7 @@ My approach uses Nvidia's Instant-NGP and Neural Networks to produce perfect-loo
 
 2. <b>Crossing Point Detection:</b> If a crossing point in the path is detected, the path is segmented, and a new path is synthesized using the existing trajectory, starting from the crossing point.
 
-3. <b>Image-Based Path Segmentation:</b> If there is no crossing point in the path, n instances where no crossing points exist, the two most similar images from the video's start and end are identified. The path is then cropped around those points.
+3. <b>Image-Based Path Segmentation:</b> If there is no crossing point in the path, the two most similar images from the video's start and end are identified. The path is then cropped around those points, generating the path is done using a neural network as explained in '4'.
 
 4. <b>Path Generation with LSTM:</b> In the case of cropped ends to the path, we employ an LSTM network trained on the rest of the path to generate a seamless connection between the endpoint remnants. This LSTM implementation serves to preserve the inherent flow of the path while effectively bridging any discontinuities that may have arisen due to cropping.
 
