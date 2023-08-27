@@ -39,14 +39,6 @@ Using this approach can also serve as a good shaking stabilization for videos. T
 - <b>Dependency on Instant-NGP:</b> </br>
   Nvidia's Instant-NGP offers a streamlined process to train the nerf, generate a camera path, and render the video. However, this also ties us to its limitations. Though many of its outputs are commendable, some fall short, as evidenced by the 'avocado' render below. Despite a well generated camera path, constraints in the data can lead to flawed nerf generation from specific angles.
 
-<h2> Limitations </h2>
-
-- <b>Original Data Prerequisites:</b> 
-    
-    1. Our approach assumes that the data inherently possesses a crossing point or that it commences and concludes with a comparable frame structure. This similarity ensures that the viewpoint captures similar scenes, forming the foundation for our methodology.
-
-    2. We also assume that the scene is static (doesn't have moving objects).
-
 <h2>Usage:</h2>
 
 ```shell
