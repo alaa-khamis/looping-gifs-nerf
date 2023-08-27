@@ -17,9 +17,9 @@ def write_camera_path_json(camera_path_data, json_path):
         json.dump(camera_path_data, f, indent=2)
 
 # Calculate FOV (horizontal)
-def calculate_fov(fl_x, w):
-    fov_x = 2 * math.degrees(math.atan(w / (2 * fl_x)))
-    return fov_x
+def calculate_fov(fl_y, h):
+    fov = 2 * math.degrees(math.atan(h / (2 * fl_y)))
+    return fov
 
 # Linear Interpolation
 def linear_interpolate(value1, value2, factor):

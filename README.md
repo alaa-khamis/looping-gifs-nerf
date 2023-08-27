@@ -23,13 +23,51 @@ My approach uses Nvidia's Instant-NGP and Neural Networks to produce perfect-loo
 
 3. <b>Image-Based Path Segmentation:</b> If there is no crossing point in the path, the two most similar images from the video's start and end are identified. The path is then cropped around those points, generating the path is done using a neural network as explained in '4'.
 
-4. <b>Path Generation with LSTM:</b> In the case of cropped ends to the path, we employ an LSTM network trained on the rest of the path to generate a seamless connection between the endpoint remnants. This LSTM implementation serves to preserve the inherent flow of the path while effectively bridging any discontinuities that may have arisen due to cropping.
+4. <b>Path Generation with LSTM:</b> In the case of cropped ends to the path, we employ an LSTM network trained on the rest of the path to generate a seamless connection between the endpoint remnants. We generate points in a linear line interpolating between the two ends, then to each point along the line, we predict its correct position using the network and apply the change while maintaining the distance and continuity that the linear interpolation provides. In addition, This implementation serves to preserve the inherent flow of the path while effectively bridging any discontinuities that may have arisen due to cropping.
 
 <h4>Extra Feature:</h4>
 Using this approach can also serve as a good shaking stabilization for videos. The interpolation between camera frames in the path results in a smooth video render of the scene using the original camera frames.
 
+<h2> Limitations </h2>
 
-<h2>Examples:</h2>
+- <b>Original Data Prerequisites:</b> 
+    
+    1. Our approach assumes that the data inherently possesses a crossing point or that it commences and concludes with a comparable frame structure. This similarity ensures that the viewpoint captures similar scenes, forming the foundation for our methodology.
+
+    2. We also assume that the scene is static (doesn't have moving objects).
+
+- <b>Dependency on Instant-NGP:</b> </br>
+  Nvidia's Instant-NGP offers a streamlined process to train the nerf, generate a camera path, and render the video. However, this also ties us to its limitations. Though many of its outputs are commendable, some fall short, as evidenced by the 'avocado' render below. Despite a well generated camera path, constraints in the data can lead to flawed nerf generation from specific angles.
+
+<h2> Limitations </h2>
+
+- <b>Original Data Prerequisites:</b> 
+    
+    1. Our approach assumes that the data inherently possesses a crossing point or that it commences and concludes with a comparable frame structure. This similarity ensures that the viewpoint captures similar scenes, forming the foundation for our methodology.
+
+    2. We also assume that the scene is static (doesn't have moving objects).
+
+<h2>Usage:</h2>
+
+```shell
+python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--duration DURATION] [--smoothness SMOOTHNESS] [--fps FPS]
+```
+
+<h3>Arguments:</h3>
+
+```--data ```: (Required) Path to the directory containing the image and transformation data. The directory should have an 'images' sub-directory containing all the images and a 'transforms.json' generated from running COLMAP (see data preperation below).
+
+```--output_dir```: (Required) Directory where the generated camera path JSON files ('camera_path.json' and 'full_camera_path.json') will be saved.
+
+```--duration```: (Optional) The total duration of the camera path in seconds. Default is 10 seconds.
+
+```--smoothness```: (Optional) A factor that influences the smoothness of the camera path. The higher the value, the smoother the path. Default is 0.
+
+```--fps```: (Optional) Frames per second for the camera path. Default is 24 FPS.
+
+---
+
+<h2>Results:</h2>
 
 <h2> Synthetics Data:</h2>
 <h3> Skull Disconnected:</h3>
@@ -80,6 +118,30 @@ Using this approach can also serve as a good shaking stabilization for videos. T
   </tbody>
 </table>
 
+<h3> Avocado:</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>Original</th>
+      <th>Generated</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Path</td>
+      <td><img src="results/avocado/avocado_original_path.png" alt="Original Path" width="350"></td>
+      <td><img src="results/avocado/avocado_generated_path.png" alt="Generated Path" width="350"></td>
+    </tr>
+    <tr>
+      <td>GIF</td>
+      <td><img src="results/avocado/avocado_original.gif" alt="Original" width="350"></td>
+      <td><img src="results/avocado/avocado_generated.gif" alt="Generated" width="350"></td>
+    </tr>
+  </tbody>
+</table>
+
 <h2>Real Data </h2>
 <h3> Books:</h3>
 
@@ -105,15 +167,60 @@ Using this approach can also serve as a good shaking stabilization for videos. T
   </tbody>
 </table>
 
-<h2> Limitations </h2>
+<h3> Doll:</h3>
 
-- <b>Original Data Prerequisites:</b> 
-    
-    1. Our approach assumes that the data inherently possesses a crossing point or that it commences and concludes with a comparable frame structure. This similarity ensures that the viewpoint captures similar scenes, forming the foundation for our methodology.
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>Original</th>
+      <th>Generated</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Path</td>
+      <td><img src="results/doll/doll_original_path.png" alt="Original Path" width="350"></td>
+      <td><img src="results/doll/doll_generated_path.png" alt="Generated Path" width="350"></td>
+    </tr>
+    <tr>
+      <td>GIF</td>
+      <td><img src="results/doll/doll_original.gif" alt="Original" width="350"></td>
+      <td><img src="results/doll/doll_generated.gif" alt="Generated" width="350"></td>
+    </tr>
+  </tbody>
+</table>
 
-    2. We also assume that the scene is static (doesn't have moving objects).
+<h3> Controller:</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>Original</th>
+      <th>Generated</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Path</td>
+      <td><img src="results/controller/controller_original_path.png" alt="Original Path" width="350"></td>
+      <td><img src="results/controller/controller_generated_path.png" alt="Generated Path" width="350"></td>
+    </tr>
+    <tr>
+      <td>GIF</td>
+      <td><img src="results/controller/controller_original.gif" alt="Original" width="350"></td>
+      <td><img src="results/controller/controller_generated.gif" alt="Generated" width="350"></td>
+    </tr>
+  </tbody>
+</table>
 
 <h2> Refrences </h2>
 
 1. <b>[Nvidia's Instant-NGP](https://github.com/NVlabs/instant-ngp/)</b>
 2. <b>[Data Preparation for NeRF](https://github.com/NVlabs/instant-ngp/blob/master/docs/nerf_dataset_tips.md#colmap)</b>
+3. <b>[Skull Model](https://www.blenderboom.com/product/deer-skull-1/)</b>
+4. <b>[Avocado Model](https://www.blenderboom.com/product/avocado_fruit/)</b>
+
+* Synthetic data was created in blender.
+* Real data was shot on an iphone X.

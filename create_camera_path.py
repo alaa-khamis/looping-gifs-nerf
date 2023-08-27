@@ -161,7 +161,7 @@ def main():
     # Get data from 'trasnforms.json'
     transforms_data = load_transforms_json(str(args.data + '/transforms.json'))
 
-    fov = calculate_fov(transforms_data["fl_x"], transforms_data["w"])
+    fov = calculate_fov(transforms_data["fl_y"], transforms_data["h"])
 
     # Generate camera path
     camera_path_data = generate_path(transforms_data, images, args.fps, args.smoothness, args.duration,fov)

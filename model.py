@@ -59,31 +59,6 @@ def train_model(data, model, epochs=100, lr=0.001, clip_norm=5):
 
     return model
 
-def predict_path(model, start_point, end_point, num_points=30):
-    predicted_path = [start_point]
-    current_input = start_point.unsqueeze(0)
-
-    for _ in range(num_points):
-        
-        next_point = model(current_input)
-        predicted_path.append(next_point.squeeze(0))
-        
-        # Break the loop if the next_point is very close to the end_point
-        if torch.all(torch.abs(next_point - end_point) < 0.5):
-            break
-            
-        current_input = next_point
-
-    # Convert tensors to nested lists and ensure the format
-    formatted_path = []
-    for point in predicted_path:
-        # Reshape the tensor into a 3x4 matrix.
-        reshaped_matrix = point.view(4, 4).tolist()
-        
-        formatted_path.append(reshaped_matrix)
-
-    return formatted_path
-
 # Generate set of linearly interpolated points
 def interpolate(start, end, num_points):
     alphas = torch.linspace(0, 1, num_points).unsqueeze(-1).cuda()
@@ -102,8 +77,6 @@ def refine_path(model, start_point, end_point, num_points=30):
         
         refined_point = model(current_input)
         
-        # We can use a weighted average of the refined_point and target_point
-        # This step will help to keep the refined path closer to the original interpolation.
         refined_point = 0.85 * refined_point + 0.15 * target_point
 
         refined_path.append(refined_point.squeeze(0))
