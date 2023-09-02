@@ -56,18 +56,44 @@ def generate_path(data, images, fps, smoothness, duration, fov):
         
     frames_dict = dict(sorted(frames_dict.items()))
 
+    data = [torch.tensor(frames_dict[frame]).view(-1).cuda() for frame in frames_dict.keys()]
+
     translations = [get_translation(np.array(frames_dict[frame])) for frame in frames_dict.keys()]
 
     cross_frames, cross_frames_indices = find_cross_frames(translations, fps)
 
+    # Find interest points
     if cross_frames_indices and abs(cross_frames_indices[0] - cross_frames_indices[1]) > fps:
 
         print("Corssing Frames = ", cross_frames_indices)
 
-        start_idx = cross_frames_indices[0]
-        end_idx = cross_frames_indices[1]
+        samples = 3
 
-        q, t = normalize_transforms(np.array(frames_dict[start_idx]))
+        start_idx = cross_frames_indices[0] + samples
+        end_idx = cross_frames_indices[1] - samples
+    
+    else:
+        pair_images, pair_images_indices = find_most_similar(images, fps)
+
+        samples = 10
+
+        start_idx = pair_images_indices[0] + samples
+        end_idx = pair_images_indices[1] - samples
+
+    # Define the model
+    model = LSTMModel(16, 150, 2).cuda()
+
+    data = data[start_idx : end_idx + 1]
+
+    # Train the model
+    model = train_model(data, model, epochs=150)
+
+    # Generate path
+    path = refine_path(model, data[-2], data[0], 2 * samples + 1)
+    
+    # Create path in json
+    for matrix in path:
+        q, t = normalize_transforms(np.array(matrix))
 
         camera_path_data['path'].append({
             "R": list(q),
@@ -79,48 +105,13 @@ def generate_path(data, images, fps, smoothness, duration, fov):
             "scale": 1.6500000953674316,
             "slice": 0.0
         })
-
-        start_idx += 1
     
-    else:
-        pair_images, pair_images_indices = find_most_similar(images, fps)
-
-        samples = 10
-
-        start_idx = pair_images_indices[0] + samples
-        end_idx = pair_images_indices[1] - samples
-
-        data = [torch.tensor(frames_dict[frame]).view(-1).cuda() for frame in frames_dict.keys()]
-
-        # Define the model
-        model = LSTMModel(16, 150, 2).cuda()
-
-        data = data[start_idx : end_idx + 1]
-
-        # Train the model
-        model = train_model(data, model, epochs=150)
-
-        path = refine_path(model, data[-1], data[0], 2 * samples + 1)
-        
-        for matrix in path:
-            q, t = normalize_transforms(np.array(matrix))
-
-            camera_path_data['path'].append({
-                "R": list(q),
-                "T": list(t),
-                "aperture_size": 0.0,
-                "fov": fov,
-                "glow_mode": 0,
-                "glow_y_cutoff": 0.0,
-                "scale": 1.6500000953674316,
-                "slice": 0.0
-            })
-        
-        start_idx += 1
-        end_idx -= 1
+    start_idx += 1
+    end_idx -= 1
     
     n_frames = end_idx - start_idx + 1
 
+    # Add the rest of the original camera path
     for ind in np.linspace(start_idx, end_idx, max(25, (1-smoothness) * n_frames), endpoint=True, dtype=int):
         q, t = normalize_transforms(np.array(frames_dict[ind]))
         

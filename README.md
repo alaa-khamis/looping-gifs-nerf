@@ -19,11 +19,12 @@ My approach uses Nvidia's Instant-NGP and Neural Networks to produce perfect-loo
 
 1. <b>Rendering the NeRF:</b> I used Nvidia's Instant NGP to render the nerf using the original video.
 
-2. <b>Crossing Point Detection:</b> If a crossing point in the path is detected, the path is segmented, and a new path is synthesized using the existing trajectory, starting from the crossing point.
+2. <b>Finding Interest Point:</b>
+    - <b>Crossing Point Detection:</b> If a crossing point in the path is detected, the path is segmented, and a new path is synthesized using the existing trajectory, starting from the crossing point.
 
-3. <b>Image-Based Path Segmentation:</b> If there is no crossing point in the path, the two most similar images from the video's start and end are identified. The path is then cropped around those points, generating the path is done using a neural network as explained in '4'.
+    - <b>Image-Based Path Segmentation:</b> If there is no crossing point in the path, the two most similar images from the video's start and end are identified. The path is then cropped around those points, generating the path is done using a neural network as explained in '4'.
 
-4. <b>Path Generation with LSTM:</b> In the case of cropped ends to the path, we employ an LSTM network trained on the rest of the path to generate a seamless connection between the endpoint remnants. We generate points in a linear line interpolating between the two ends, then to each point along the line, we predict its correct position using the network and apply the change while maintaining the distance and continuity that the linear interpolation provides. In addition, This implementation serves to preserve the inherent flow of the path while effectively bridging any discontinuities that may have arisen due to cropping.
+4. <b>Path Generation with LSTM:</b> After identifying the key interest points and cropping the ends of the path, we employ an LSTM network trained on the rest of the path to generate a seamless connection between the endpoint remnants. We generate points in a linear line interpolating between the two ends. For each point along this linear path, we predict its correct position using the network and apply the change while maintaining the distance and continuity that the linear interpolation provides. In addition, This implementation serves to preserve the inherent flow of the path while effectively bridging any discontinuities that may have arisen due to cropping.
 
 <h4>Extra Feature:</h4>
 Using this approach can also serve as a good shaking stabilization for videos. The interpolation between camera frames in the path results in a smooth video render of the scene using the original camera frames.
@@ -69,6 +70,8 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
 
 <h2>Results:</h2>
 
+* The red segment in the 'Path GIF' is the generated path.
+
 <h2> Synthetics Data:</h2>
 <h3> Skull Disconnected:</h3>
 
@@ -83,13 +86,18 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
   <tbody>
     <tr>
       <td>Path</td>
-      <td><img src="results/skull_linear/disconnected/camera_visualization.png" alt="Original Path" width="350"></td>
-      <td><img src="results/skull_lstm/skull_generated_path.png" alt="Generated Path" width="350"></td>
+      <td><img src="results/skull/skull_original_path.png" alt="Original Path" width="350"></td>
+      <td><img src="results/skull/skull_generated_path.png" alt="Generated Path" width="350"></td>
     </tr>
     <tr>
-      <td>GIF</td>
-      <td><img src="results/skull_linear/disconnected/skull_disconnected_original.gif" alt="Original" width="350"></td>
-      <td><img src="results/skull_lstm/skull_generated.gif" alt="Generated" width="350"></td>
+      <td>Path GIF</td>
+      <td><img src="results/skull/skull_original_path_gif.gif" alt="Original Path" width="350"></td>
+      <td><img src="results/skull/skull_generated_path_gif.gif" alt="Generated Path" width="350"></td>
+    </tr>
+    <tr>
+      <td>Rendered GIF</td>
+      <td><img src="results/skull/skull_original.gif" alt="Original" width="350"></td>
+      <td><img src="results/skull/skull_generated.gif" alt="Generated" width="350"></td>
     </tr>
   </tbody>
 </table>
@@ -107,13 +115,18 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
   <tbody>
     <tr>
       <td>Path</td>
-      <td><img src="results/skull_linear/tie/camera_visualization.png" alt="Original Path" width="350"></td>
-      <td><img src="results/skull_linear/tie/path_visualization.png" alt="Generated Path" width="350"></td>
+      <td><img src="results/skull_tie/skull_tie_original_path.png" alt="Original Path" width="350"></td>
+      <td><img src="results/skull_tie/skull_tie_generated_path.png" alt="Generated Path" width="350"></td>
     </tr>
     <tr>
-      <td>GIF</td>
-      <td><img src="results/skull_linear/tie/skull_tie_original.gif" alt="Original" width="350"></td>
-      <td><img src="results/skull_linear/tie/skull_tie_render.gif" alt="Generated" width="350"></td>
+      <td>Path GIF</td>
+      <td><img src="results/skull_tie/skull_tie_original_path_gif.gif" alt="Original Path" width="350"></td>
+      <td><img src="results/skull_tie/skull_tie_generated_path_gif.gif" alt="Generated Path" width="350"></td>
+    </tr>
+    <tr>
+      <td>Rendered GIF</td>
+      <td><img src="results/skull_tie/skull_tie_original.gif" alt="Original" width="350"></td>
+      <td><img src="results/skull_tie/skull_tie_generated.gif" alt="Generated" width="350"></td>
     </tr>
   </tbody>
 </table>
@@ -135,7 +148,12 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
       <td><img src="results/avocado/avocado_generated_path.png" alt="Generated Path" width="350"></td>
     </tr>
     <tr>
-      <td>GIF</td>
+      <td>Path GIF</td>
+      <td><img src="results/avocado/avocado_original_path_gif.gif" alt="Original Path Gif" width="350"></td>
+      <td><img src="results/avocado/avocado_generated_path_gif.gif" alt="Generated Path Gif" width="350"></td>
+    </tr>
+    <tr>
+      <td>Rendered GIF</td>
       <td><img src="results/avocado/avocado_original.gif" alt="Original" width="350"></td>
       <td><img src="results/avocado/avocado_generated.gif" alt="Generated" width="350"></td>
     </tr>
@@ -160,7 +178,12 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
       <td><img src="results/books/books_generated_path.png" alt="Generated Path" width="350"></td>
     </tr>
     <tr>
-      <td>GIF</td>
+      <td>Path GIF</td>
+      <td><img src="results/books/books_original_path_gif.gif" alt="Original Path" width="350"></td>
+      <td><img src="results/books/books_generated_path_gif.gif" alt="Generated Path" width="350"></td>
+    </tr>
+    <tr>
+      <td>Rendered GIF</td>
       <td><img src="results/books/books_original.gif" alt="Original" width="350"></td>
       <td><img src="results/books/books_generated.gif" alt="Generated" width="350"></td>
     </tr>
@@ -184,7 +207,12 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
       <td><img src="results/doll/doll_generated_path.png" alt="Generated Path" width="350"></td>
     </tr>
     <tr>
-      <td>GIF</td>
+      <td>Path GIF</td>
+      <td><img src="results/doll/doll_original_path_gif.gif" alt="Original Path" width="350"></td>
+      <td><img src="results/doll/doll_generated_path_gif.gif" alt="Generated Path" width="350"></td>
+    </tr>
+    <tr>
+      <td>Rendered GIF</td>
       <td><img src="results/doll/doll_original.gif" alt="Original" width="350"></td>
       <td><img src="results/doll/doll_generated.gif" alt="Generated" width="350"></td>
     </tr>
@@ -208,7 +236,12 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
       <td><img src="results/controller/controller_generated_path.png" alt="Generated Path" width="350"></td>
     </tr>
     <tr>
-      <td>GIF</td>
+      <td>Path GIF</td>
+      <td><img src="results/controller/controller_original_path_gif.gif" alt="Original Path" width="350"></td>
+      <td><img src="results/controller/controller_generated_path_gif.gif" alt="Generated Path" width="350"></td>
+    </tr>
+    <tr>
+      <td>Rendered GIF</td>
       <td><img src="results/controller/controller_original.gif" alt="Original" width="350"></td>
       <td><img src="results/controller/controller_generated.gif" alt="Generated" width="350"></td>
     </tr>
