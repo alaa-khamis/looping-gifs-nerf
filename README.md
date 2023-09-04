@@ -15,14 +15,60 @@ Even slight timing differences between the end and start frames can result in di
 
 <h2> Solution </h2>
 
-My approach uses Nvidia's Instant-NGP and Neural Networks to produce perfect-looping renderes.
+My approach uses Nvidia's Instant-NGP and Neural Networks to produce perfect-looping renders.
 
 1. <b>Rendering the NeRF:</b> I used Nvidia's Instant NGP to render the nerf using the original video.
 
 2. <b>Finding Interest Point:</b>
-    - <b>Crossing Point Detection:</b> If a crossing point in the path is detected, the path is segmented, and a new path is synthesized using the existing trajectory, starting from the crossing point.
+    - <b>Crossing Point Detection:</b> This method becomes applicable when during filming, our path intersects itself at certain instances. In such cases, we identify pairs of frames that are in close proximity (within a specified threshold) at the point of intersection. By selecting these frames, we exclude the surplus segments of the path. This allows us to establish a segment centered around the intersection point. The algorithm for this works as follows:
+    
+      1. <b>Trajectory Analysis:</b> Analyze the camera trajectory to find points where it comes close to crossing its own path. This is achieved by evaluating the positional data at each frame.
 
-    - <b>Image-Based Path Segmentation:</b> If there is no crossing point in the path, the two most similar images from the video's start and end are identified. The path is then cropped around those points, generating the path is done using a neural network as explained in '4'.
+      2. <b>Crossing Point Estimation:</b> Once potential crossing points are identified, a threshold value (a minimal distance or angular difference) is defined to determine how close the paths are to a "true crossing". This threshold can be adjusted based on the specific requirements of the loop.
+
+      3. <b>Cropping the path:</b> After choosing the closest frames to be crossing, we crop the path around them with a set size.
+
+      - Example (Skull Tie at crossing point):
+          <table>
+          <thead>
+          <tr>
+            <th>Path</th>
+            <th>First Point #10/120</th>
+            <th>Second Point #106/120 </th>
+          </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><img src="results/skull_tie/skull_tie_original_path.png" alt="Two" width="350"></td>
+              <td><img src="results/skull_tie/0010.jpg" alt="One" width="350"></td>
+              <td><img src="results/skull_tie/0106.jpg" alt="Two" width="350"></td>
+            </tr>
+          </tbody>
+          </table>
+
+    - <b>Image-Based Path Segmentation:</b> This method comes into play when no significant crossing points are found. The focus here is to find two frames with similar visual content and poses, which would act as the start and end points for the new connecting path. The algorithm for this would be:
+
+      1. <b>Frame Similarity Analysis:</b> Analyze the visual content or poses in each frame, comparing them using similarity metrics, in our case we used ORB matching to identify the most similar frames throughout the video.
+      
+      2. <b>Cropping the path:</b> After choosing the most similar frames, we crop the path around them with a set size.
+
+      - Example (Skull):
+          <table>
+          <thead>
+          <tr>
+            <th>First Point #2/120</th>
+            <th>Second Point #120/120 </th>
+          </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><img src="results/skull/0002.jpg" alt="One" width="350"></td>
+              <td><img src="results/skull/0120.jpg" alt="Two" width="350"></td>
+            </tr>
+          </tbody>
+          </table>
+
+3. <b>Selection of Start and End Points:</b> Whether through "Crossing Point Detection" or "Image-Based Path Segmentation", our approach remains consistent. We identify a segment of the path surrounding these frames (either crossing frames, or most similar frames) and crop it by a predetermined value to determine our new start and end points, thus facilitating an area to generate the looping path.
 
 4. <b>Path Generation with LSTM:</b> After identifying the key interest points and cropping the ends of the path, we employ an LSTM network trained on the rest of the path to generate a seamless connection between the endpoint remnants. We generate points in a linear line interpolating between the two ends. For each point along this linear path, we predict its correct position using the network and apply the change while maintaining the distance and continuity that the linear interpolation provides. In addition, This implementation serves to preserve the inherent flow of the path while effectively bridging any discontinuities that may have arisen due to cropping.
 

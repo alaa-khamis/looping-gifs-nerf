@@ -65,7 +65,7 @@ def generate_path(data, images, fps, smoothness, duration, fov):
     # Find interest points
     if cross_frames_indices and abs(cross_frames_indices[0] - cross_frames_indices[1]) > fps:
 
-        print("Corssing Frames = ", cross_frames_indices)
+        print("Crossing Frames = ", cross_frames_indices)
 
         samples = 3
 
@@ -74,6 +74,8 @@ def generate_path(data, images, fps, smoothness, duration, fov):
     
     else:
         pair_images, pair_images_indices = find_most_similar(images, fps)
+
+        print("Image Pair = ", pair_images_indices)
 
         samples = 10
 
