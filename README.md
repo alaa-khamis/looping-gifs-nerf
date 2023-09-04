@@ -33,15 +33,15 @@ My approach uses Nvidia's Instant-NGP and Neural Networks to produce perfect-loo
           <thead>
           <tr>
             <th>Path</th>
-            <th>First Point #10/120</th>
-            <th>Second Point #106/120 </th>
+            <th>First Point - Image #10/120</th>
+            <th>Second Point - Image #106/120 </th>
           </tr>
           </thead>
           <tbody>
             <tr>
-              <td><img src="results/skull_tie/skull_tie_original_path.png" alt="Two" width="350"></td>
-              <td><img src="results/skull_tie/0010.jpg" alt="One" width="350"></td>
-              <td><img src="results/skull_tie/0106.jpg" alt="Two" width="350"></td>
+              <td><img src="results/skull_tie/skull_tie_original_path.png" alt="Two" width="500"></td>
+              <td><img src="results/skull_tie/0010.jpg" alt="One" width="500"></td>
+              <td><img src="results/skull_tie/0106.jpg" alt="Two" width="500"></td>
             </tr>
           </tbody>
           </table>
@@ -56,8 +56,8 @@ My approach uses Nvidia's Instant-NGP and Neural Networks to produce perfect-loo
           <table>
           <thead>
           <tr>
-            <th>First Point #2/120</th>
-            <th>Second Point #120/120 </th>
+            <th>First Image #2/120</th>
+            <th>Second Image #120/120 </th>
           </tr>
           </thead>
           <tbody>
