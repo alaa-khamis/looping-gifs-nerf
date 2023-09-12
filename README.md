@@ -128,14 +128,9 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
       <td><img src="results/skull/skull_generated_path.png" alt="Generated Path" width="350"></td>
     </tr>
     <tr>
-      <td>Path GIF</td>
-      <td><img src="results/skull/skull_original_path_gif.gif" alt="Original Path" width="350"></td>
-      <td><img src="results/skull/skull_generated_path_gif.gif" alt="Generated Path" width="350"></td>
-    </tr>
-    <tr>
-      <td>Rendered GIF</td>
-      <td><img src="results/skull/skull_original.gif" alt="Original" width="350"></td>
-      <td><img src="results/skull/skull_generated.gif" alt="Generated" width="350"></td>
+      <td>Gif</td>
+      <td><img src="results/skull/original.gif" alt="Original Gif" width="350"></td>
+      <td><img src="results/skull/generated.gif" alt="Generated Gif" width="350"></td>
     </tr>
   </tbody>
 </table>
@@ -157,14 +152,9 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
       <td><img src="results/skull_tie/skull_tie_generated_path.png" alt="Generated Path" width="350"></td>
     </tr>
     <tr>
-      <td>Path GIF</td>
-      <td><img src="results/skull_tie/skull_tie_original_path_gif.gif" alt="Original Path" width="350"></td>
-      <td><img src="results/skull_tie/skull_tie_generated_path_gif.gif" alt="Generated Path" width="350"></td>
-    </tr>
-    <tr>
-      <td>Rendered GIF</td>
-      <td><img src="results/skull_tie/skull_tie_original.gif" alt="Original" width="350"></td>
-      <td><img src="results/skull_tie/skull_tie_generated.gif" alt="Generated" width="350"></td>
+      <td>Gif</td>
+      <td><img src="results/skull_tie/original.gif" alt="Original Gif" width="350"></td>
+      <td><img src="results/skull_tie/generated.gif" alt="Generated Gif" width="350"></td>
     </tr>
   </tbody>
 </table>
@@ -186,14 +176,9 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
       <td><img src="results/avocado/avocado_generated_path.png" alt="Generated Path" width="350"></td>
     </tr>
     <tr>
-      <td>Path GIF</td>
-      <td><img src="results/avocado/avocado_original_path_gif.gif" alt="Original Path Gif" width="350"></td>
-      <td><img src="results/avocado/avocado_generated_path_gif.gif" alt="Generated Path Gif" width="350"></td>
-    </tr>
-    <tr>
-      <td>Rendered GIF</td>
-      <td><img src="results/avocado/avocado_original.gif" alt="Original" width="350"></td>
-      <td><img src="results/avocado/avocado_generated.gif" alt="Generated" width="350"></td>
+      <td>Gif</td>
+      <td><img src="results/avocado/original.gif" alt="Original Gif" width="350"></td>
+      <td><img src="results/avocado/generated.gif" alt="Generated Gif" width="350"></td>
     </tr>
   </tbody>
 </table>
@@ -216,14 +201,9 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
       <td><img src="results/books/books_generated_path.png" alt="Generated Path" width="350"></td>
     </tr>
     <tr>
-      <td>Path GIF</td>
-      <td><img src="results/books/books_original_path_gif.gif" alt="Original Path" width="350"></td>
-      <td><img src="results/books/books_generated_path_gif.gif" alt="Generated Path" width="350"></td>
-    </tr>
-    <tr>
-      <td>Rendered GIF</td>
-      <td><img src="results/books/books_original.gif" alt="Original" width="350"></td>
-      <td><img src="results/books/books_generated.gif" alt="Generated" width="350"></td>
+      <td>Gif</td>
+      <td><img src="results/books/original.gif" alt="Original Gif" width="350"></td>
+      <td><img src="results/books/generated.gif" alt="Generated Gif" width="350"></td>
     </tr>
   </tbody>
 </table>
@@ -245,14 +225,9 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
       <td><img src="results/doll/doll_generated_path.png" alt="Generated Path" width="350"></td>
     </tr>
     <tr>
-      <td>Path GIF</td>
-      <td><img src="results/doll/doll_original_path_gif.gif" alt="Original Path" width="350"></td>
-      <td><img src="results/doll/doll_generated_path_gif.gif" alt="Generated Path" width="350"></td>
-    </tr>
-    <tr>
-      <td>Rendered GIF</td>
-      <td><img src="results/doll/doll_original.gif" alt="Original" width="350"></td>
-      <td><img src="results/doll/doll_generated.gif" alt="Generated" width="350"></td>
+      <td>Gif</td>
+      <td><img src="results/doll/original.gif" alt="Original Gif" width="350"></td>
+      <td><img src="results/doll/generated.gif" alt="Generated Gif" width="350"></td>
     </tr>
   </tbody>
 </table>
@@ -274,14 +249,9 @@ python create_camera_path.py --data [DATA_DIR] --output_dir [OUTPUT_DIR] [--dura
       <td><img src="results/controller/controller_generated_path.png" alt="Generated Path" width="350"></td>
     </tr>
     <tr>
-      <td>Path GIF</td>
-      <td><img src="results/controller/controller_original_path_gif.gif" alt="Original Path" width="350"></td>
-      <td><img src="results/controller/controller_generated_path_gif.gif" alt="Generated Path" width="350"></td>
-    </tr>
-    <tr>
-      <td>Rendered GIF</td>
-      <td><img src="results/controller/controller_original.gif" alt="Original" width="350"></td>
-      <td><img src="results/controller/controller_generated.gif" alt="Generated" width="350"></td>
+      <td>Gif</td>
+      <td><img src="results/controller/original.gif" alt="Original Gif" width="350"></td>
+      <td><img src="results/controller/generated.gif" alt="Generated Gif" width="350"></td>
     </tr>
   </tbody>
 </table>
